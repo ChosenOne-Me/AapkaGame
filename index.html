@@ -1,274 +1,286 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>System Diagnostic</title>
-
-<style>
-*{box-sizing:border-box}
-html,body{
-  margin:0;width:100%;height:100%;
-  background:#000;color:#00ff66;
-  font-family:"Courier New",monospace;
-  overflow:hidden;
-}
-body{
-  background:
-  radial-gradient(circle at 50% 45%,#073014 0%,#020805 35%,#000 75%);
-}
-#start{
-  position:fixed;inset:0;z-index:100;
-  display:flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  background:#000;
-  text-align:center;
-}
-#start h1{
-  font-size:clamp(28px,8vw,60px);
-  letter-spacing:5px;
-  text-shadow:0 0 20px #00ff66;
-}
-#start button,#again{
-  border:1px solid #00ff66;
-  background:#001b09;color:#00ff66;
-  padding:15px 28px;
-  font:700 16px monospace;
-  box-shadow:0 0 20px #00ff6644;
-  cursor:pointer;
-}
-#start small{opacity:.55;margin:18px}
-
-#app{
-  display:none;
-  width:100vw;height:100vh;
-  padding:12px;
-}
-.top{
-  height:42px;
-  border-bottom:1px solid #00ff6644;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:12px;
-}
-.dot{
-  width:8px;height:8px;border-radius:50%;
-  display:inline-block;background:#00ff66;
-  box-shadow:0 0 10px #00ff66;
-  margin-right:7px;
-}
-#terminal{
-  height:calc(100vh - 70px);
-  overflow:hidden;
-  padding:12px 4px;
-}
-.line{
-  font-size:clamp(11px,2.8vw,15px);
-  line-height:1.55;
-  white-space:nowrap;
-  overflow:hidden;
-  text-shadow:0 0 6px #00ff66;
-}
-.dim{opacity:.55}
-.blue{color:#00c8ff;text-shadow:0 0 7px #00c8ff}
-.yellow{color:#ffe600;text-shadow:0 0 7px #ffe600}
-.red{color:#ff3030;text-shadow:0 0 9px red}
-.white{color:#eee;text-shadow:none}
-
-.barbox{
-  width:min(650px,95vw);
-  height:17px;
-  border:1px solid #00ff66;
-  margin:7px 0 12px;
-  box-shadow:0 0 12px #00ff6633;
-}
-.bar{
-  width:0;height:100%;
-  background:#00ff66;
-  box-shadow:0 0 14px #00ff66;
-  transition:width .18s linear;
-}
-
-#warning{
-  display:none;
-  position:fixed;inset:0;z-index:50;
-  background:rgba(50,0,0,.97);
-  align-items:center;justify-content:center;
-  flex-direction:column;text-align:center;
-  color:#ff2222;
-  animation:flash .22s infinite alternate;
-}
-#warning h1{
-  font:900 clamp(38px,12vw,100px) Arial;
-  margin:12px;
-  text-shadow:0 0 30px red;
-}
-#warning div{font-size:clamp(13px,4vw,22px)}
-#count{
-  font:bold 80px Arial;
-  margin-top:15px;
-}
-
-#prank{
-  display:none;
-  position:fixed;inset:0;z-index:200;
-  background:#000;
-  align-items:center;justify-content:center;
-  flex-direction:column;text-align:center;
-}
-#prank h1{
-  margin:0;
-  font:900 clamp(42px,13vw,110px) Arial;
-  color:#00ff66;
-  text-shadow:0 0 35px #00ff66;
-  animation:pop .7s ease-out;
-}
-#prank p{
-  color:#fff;
-  font:18px Arial;
-  margin:18px;
-}
-#again{margin-top:10px}
-
-.glitch{
-  animation:shake .08s infinite;
-}
-@keyframes flash{
-  from{opacity:.72}to{opacity:1}
-}
-@keyframes shake{
-  0%{transform:translate(0)}
-  25%{transform:translate(5px,-2px)}
-  50%{transform:translate(-5px,2px)}
-  75%{transform:translate(2px,4px)}
-  100%{transform:translate(0)}
-}
-@keyframes pop{
-  0%{transform:scale(.05);opacity:0}
-  65%{transform:scale(1.12)}
-  100%{transform:scale(1);opacity:1}
-}
-.scan{
-  position:fixed;inset:0;
-  pointer-events:none;z-index:300;
-  background:repeating-linear-gradient(
-    0deg,
-    rgba(0,255,80,.025) 0px,
-    rgba(0,255,80,.025) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-}
-</style>
-</head>
-
-<body>
-
-<div id="start">
-  <h1>SYSTEM DIAGNOSTIC</h1>
-  <small>SECURE TERMINAL • INITIALIZATION REQUIRED</small>
-  <button onclick="start()">INITIALIZE</button>
-</div>
-
-<div id="app">
-  <div class="top">
-    <span><i class="dot"></i>SECURE TERMINAL</span>
-    <span id="clock">00:00</span>
-  </div>
-  <div id="terminal"></div>
-</div>
-
-<div id="warning">
-  <div>⚠ SYSTEM SECURITY EVENT ⚠</div>
-  <h1>CRITICAL</h1>
-  <div>FINAL VERIFICATION REQUIRED</div>
-  <div id="count">5</div>
-</div>
-
-<div id="prank">
-  <h1>😂 PRANK HO GYA</h1>
-  <p>Relax 😎 — ye sirf ek harmless simulation thi.</p>
-  <button id="again" onclick="location.reload()">RUN AGAIN</button>
-</div>
-
-<div class="scan"></div>
-
 <script>
-const terminal=document.getElementById("terminal");
+const terminal = document.getElementById("terminal");
 
-const logs=[
-["Initializing secure runtime...",""],
-["Loading system diagnostics module...","dim"],
-["Checking local environment...",""],
-["Preparing encrypted simulation...",""],
-["Session initialized.","blue"],
-["Running compatibility checks...",""],
-["Checking browser capabilities...",""],
-["Analyzing available system interfaces...",""],
-["Security layer: ACTIVE","blue"],
-["Generating diagnostic fingerprint...",""],
-["Fingerprint generated.","blue"],
-["Running environment scan...",""],
-["Checking storage interface...",""],
-["Checking memory interface...",""],
-["Checking display interface...",""],
-["Checking network interface...",""],
-["Network interface: SIMULATED","yellow"],
-["Beginning deep diagnostic sequence...","yellow"],
-["Module 01 — Environment scan",""],
-["Module 02 — Runtime analysis",""],
-["Module 03 — Security verification",""],
-["Module 04 — Permission audit",""],
-["Module 05 — Integrity check",""],
-["Module 06 — Session verification",""],
-["Generating encrypted checksum...",""],
-["Checksum: 7F-A9-21-CC","dim"],
-["Verifying checksum...",""],
-["Checksum verified.","blue"],
-["Scanning temporary system references...",""],
-["Reviewing cached references...",""],
-["Review complete.","blue"],
-["Running extended diagnostics...","yellow"],
-["Analyzing process states...",""],
-["Analyzing system response...",""],
-["Testing security boundaries...",""],
-["Boundary response: RESTRICTED","yellow"],
-["Running secondary verification...",""],
-["Secondary verification initialized.","blue"],
-["Checking anomaly patterns...",""],
-["Anomaly analysis: IN PROGRESS",""],
-["Compiling diagnostic report...",""],
-["Encrypting report...",""],
-["Final security validation pending...","red"]
+const scenes = [
+
+  // OPENING — slow
+  {t:"Initializing secure runtime...", c:"", wait:2200},
+  {t:"Loading diagnostic modules...", c:"dim", wait:3200},
+  {t:"Preparing secure session...", c:"", wait:1400},
+
+  // QUICK BURST
+  {t:"Session initialized.", c:"blue", wait:500},
+  {t:"Checking environment...", c:"", wait:450},
+  {t:"Reading system interfaces...", c:"", wait:500},
+  {t:"Interface response: WAITING", c:"yellow", wait:2800},
+
+  // LONG SILENCE
+  {pause:3200},
+
+  {t:"Re-attempting interface check...", c:"", wait:900},
+  {t:"Response received.", c:"blue", wait:2400},
+
+  // SCAN
+  {t:"Beginning deep diagnostic...", c:"yellow", wait:1200},
+  {progress:"DEEP SYSTEM SCAN",time:6500},
+
+  // FAST
+  {t:"Environment scan started.", c:"", wait:350},
+  {t:"Reading runtime...", c:"", wait:350},
+  {t:"Checking permissions...", c:"", wait:350},
+  {t:"Checking security layer...", c:"", wait:450},
+  {t:"Analyzing response...", c:"", wait:700},
+
+  // PAUSE
+  {pause:2400},
+
+  {t:"Unexpected response detected.", c:"yellow", wait:3200},
+
+  // SECOND SCAN
+  {t:"Running secondary verification...", c:"", wait:1000},
+  {progress:"SECURITY VERIFICATION",time:7200},
+
+  {t:"Verification incomplete.", c:"yellow", wait:1800},
+  {t:"Attempting fallback protocol...", c:"", wait:2800},
+  {t:"Fallback protocol accepted.", c:"blue", wait:1000},
+
+  // FINGERPRINT
+  {t:"Generating diagnostic fingerprint...", c:"", wait:1700},
+  {t:"Fingerprint: 7F-A9-21-CC", c:"dim", wait:900},
+  {t:"Verifying fingerprint...", c:"", wait:3600},
+  {t:"Fingerprint verified.", c:"blue", wait:2500},
+
+  // LONG SILENCE
+  {pause:3500},
+
+  // RAPID FILE CHECK
+  {t:"Scanning temporary references...", c:"", wait:500},
+  {t:"Reference 01 checked.", c:"dim", wait:300},
+  {t:"Reference 02 checked.", c:"dim", wait:300},
+  {t:"Reference 03 checked.", c:"dim", wait:300},
+  {t:"Reference 04 checked.", c:"dim", wait:500},
+
+  {pause:1800},
+
+  {t:"No direct access available.", c:"yellow", wait:3000},
+
+  // THIRD SCAN
+  {t:"Running extended integrity check...", c:"yellow", wait:1400},
+  {progress:"INTEGRITY ANALYSIS",time:8000},
+
+  // SLOW ANALYSIS
+  {t:"Analyzing process states...", c:"", wait:3500},
+  {t:"Analyzing response patterns...", c:"", wait:2600},
+  {t:"Testing security boundaries...", c:"", wait:3900},
+
+  {pause:2600},
+
+  {t:"Boundary response: RESTRICTED", c:"yellow", wait:3500},
+
+  // FINAL BUILDUP
+  {t:"Compiling diagnostic report...", c:"", wait:1800},
+  {t:"Encrypting report...", c:"", wait:4200},
+  {t:"Final validation pending...", c:"red", wait:3000},
+
+  {pause:3500},
+
+  {t:"Starting final security check...", c:"yellow", wait:1800},
+  {t:"Verifying final state...", c:"", wait:4000},
+
+  {pause:2200},
+
+  {t:"...", c:"dim", wait:3000},
+
+  {t:"Unexpected security response.", c:"yellow", wait:3200},
+
+  {pause:1800},
+
+  {t:"SECURITY EVENT DETECTED", c:"red", wait:1200},
+  {t:"SIMULATED ALERT LEVEL: CRITICAL", c:"red", wait:2500}
 ];
 
-function add(text,cls=""){
-  const d=document.createElement("div");
-  d.className="line "+cls;
-  d.textContent="> "+text;
-  terminal.appendChild(d);
-
-  while(terminal.children.length>34)
-    terminal.removeChild(terminal.firstChild);
-}
 
 function sleep(ms){
-  return new Promise(r=>setTimeout(r,ms));
+  return new Promise(resolve => setTimeout(resolve,ms));
 }
 
-async function typeLine(text,cls){
+
+function add(text,cls=""){
+
   const d=document.createElement("div");
+
   d.className="line "+cls;
+
+  d.textContent="> "+text;
+
   terminal.appendChild(d);
 
-  let out="> ";
-  for(let c of text){
-    out+=c;
-    d.textContent=out;
-    await sleep(5+Math.random()*9);
+  while(terminal.children.length>32){
+    terminal.removeChild(terminal.firstChild);
   }
+
 }
+
+
+async function typeLine(text,cls=""){
+
+  const d=document.createElement("div");
+
+  d.className="line "+cls;
+
+  terminal.appendChild(d);
+
+  let output="> ";
+
+  /*
+    Variable typing speed.
+    Kuch lines fast,
+    kuch deliberately slow.
+  */
+
+  let speed;
+
+  if(text==="..."){
+    speed=180;
+  }
+  else if(text.includes("CRITICAL")){
+    speed=35;
+  }
+  else if(text.length>35){
+    speed=10+Math.random()*10;
+  }
+  else{
+    speed=18+Math.random()*16;
+  }
+
+  for(const char of text){
+
+    output+=char;
+
+    d.textContent=output;
+
+    await sleep(speed);
+
+  }
+
+}
+
+
+async function progress(label,totalTime){
+
+  add(label+" — START","yellow");
+
+  await sleep(900);
+
+  const box=document.createElement("div");
+
+  box.className="barbox";
+
+  const bar=document.createElement("div");
+
+  bar.className="bar";
+
+  box.appendChild(bar);
+
+  terminal.appendChild(box);
+
+  let percent=0;
+
+  while(percent<100){
+
+    /*
+      Uneven progress.
+      Kabhi fast,
+      kabhi rukega.
+    */
+
+    let jump;
+
+    if(percent<20){
+      jump=Math.floor(Math.random()*3)+1;
+    }
+    else if(percent<55){
+      jump=Math.floor(Math.random()*7)+2;
+    }
+    else if(percent<75){
+      jump=Math.floor(Math.random()*2)+1;
+    }
+    else{
+      jump=Math.floor(Math.random()*5)+1;
+    }
+
+    percent=Math.min(100,percent+jump);
+
+    bar.style.width=percent+"%";
+
+    let delay;
+
+    if(percent>25 && percent<35){
+      delay=650+Math.random()*900;
+    }
+    else if(percent>70 && percent<80){
+      delay=900+Math.random()*1200;
+    }
+    else{
+      delay=100+Math.random()*260;
+    }
+
+    await sleep(delay);
+
+  }
+
+  await sleep(1000);
+
+  add("SCAN COMPLETE.","blue");
+
+  await sleep(1800);
+}
+
+
+async function finalAlert(){
+
+  await sleep(3000);
+
+  const warning=document.getElementById("warning");
+
+  warning.style.display="flex";
+
+  let number=5;
+
+  const counter=document.getElementById("count");
+
+  counter.textContent=number;
+
+  await sleep(1200);
+
+  const timer=setInterval(()=>{
+
+    number--;
+
+    counter.textContent=number;
+
+    if(number<=0){
+
+      clearInterval(timer);
+
+      warning.classList.add("glitch");
+
+      setTimeout(()=>{
+
+        warning.style.display="none";
+
+        document.getElementById("app").style.display="none";
+
+        document.getElementById("prank").style.display="flex";
+
+      },1000);
+
+    }
+
+  },1000);
+
+}
+
 
 async function start(){
 
@@ -277,93 +289,82 @@ async function start(){
   }catch(e){}
 
   document.getElementById("start").style.display="none";
+
   document.getElementById("app").style.display="block";
 
-  let sec=0;
+
+  let seconds=0;
+
   setInterval(()=>{
-    sec++;
-    let m=String(Math.floor(sec/60)).padStart(2,"0");
-    let s=String(sec%60).padStart(2,"0");
-    document.getElementById("clock").textContent=m+":"+s;
+
+    seconds++;
+
+    document.getElementById("clock").textContent =
+      String(Math.floor(seconds/60)).padStart(2,"0")
+      +":"+
+      String(seconds%60).padStart(2,"0");
+
   },1000);
 
-  await sleep(700);
 
-  for(let i=0;i<logs.length;i++){
-    await typeLine(logs[i][0],logs[i][1]);
+  /*
+    Initial silence
+  */
 
-    if(i===17 || i===33 || i===40){
-      await sleep(400);
-      await progress();
+  await sleep(1800);
+
+
+  for(const scene of scenes){
+
+    /*
+      Special silence
+    */
+
+    if(scene.pause){
+
+      await sleep(scene.pause);
+
+      continue;
+
     }
 
-    await sleep(180+Math.random()*500);
-  }
 
-  await finalSequence();
-}
+    /*
+      Progress bar scene
+    */
 
-async function progress(){
+    if(scene.progress){
 
-  const box=document.createElement("div");
-  box.className="barbox";
+      await progress(scene.progress,scene.time);
 
-  const bar=document.createElement("div");
-  bar.className="bar";
+      continue;
 
-  box.appendChild(bar);
-  terminal.appendChild(box);
-
-  let p=0;
-
-  while(p<100){
-    p+=Math.floor(Math.random()*8)+2;
-    if(p>100)p=100;
-
-    bar.style.width=p+"%";
-    await sleep(90+Math.random()*100);
-  }
-
-  await sleep(350);
-}
-
-async function finalSequence(){
-
-  await sleep(900);
-
-  add("FINAL CHECK STARTING...","yellow");
-  await sleep(700);
-
-  add("████████████████████████","red");
-  add("SECURITY EVENT DETECTED","red");
-  add("SIMULATED ALERT LEVEL: CRITICAL","red");
-
-  await sleep(1000);
-
-  const warning=document.getElementById("warning");
-  warning.style.display="flex";
-
-  let n=5;
-  const count=document.getElementById("count");
-
-  const timer=setInterval(()=>{
-    n--;
-    count.textContent=n;
-
-    if(n<=0){
-      clearInterval(timer);
-
-      warning.classList.add("glitch");
-
-      setTimeout(()=>{
-        warning.style.display="none";
-        document.getElementById("app").style.display="none";
-        document.getElementById("prank").style.display="flex";
-      },700);
     }
-  },1000);
-}
-</script>
 
-</body>
-</html>
+
+    /*
+      Dialogue
+    */
+
+    await typeLine(scene.t,scene.c);
+
+
+    /*
+      IMPORTANT:
+      Dialogue ke baad random natural pause.
+    */
+
+    let naturalPause =
+      scene.wait +
+      Math.floor(Math.random()*900);
+
+    await sleep(naturalPause);
+
+  }
+
+
+  await finalAlert();
+
+}
+
+    </script>
