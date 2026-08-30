@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>System Diagnostic</title>
 
 <style>
-
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 html,body{
 margin:0;
@@ -19,356 +14,201 @@ width:100%;
 height:100%;
 background:#000;
 color:#00ff66;
-font-family:"Courier New",monospace;
-overflow:hidden;
+font-family:monospace;
+overflow:hidden
 }
 
 #start{
 position:fixed;
 inset:0;
-z-index:100;
+background:#000;
 display:flex;
 flex-direction:column;
-justify-content:center;
 align-items:center;
-background:#000;
+justify-content:center;
 text-align:center;
+z-index:10
 }
 
 #start h1{
-font-size:clamp(28px,8vw,60px);
-letter-spacing:5px;
-text-shadow:0 0 20px #00ff66;
-}
-
-#start small{
-opacity:.55;
-margin:18px;
+font-size:clamp(30px,8vw,60px);
+text-shadow:0 0 20px #00ff66
 }
 
 button{
-border:1px solid #00ff66;
 background:#001b09;
 color:#00ff66;
-padding:15px 28px;
-font:700 16px monospace;
-box-shadow:0 0 20px #00ff6644;
-cursor:pointer;
+border:1px solid #00ff66;
+padding:14px 25px;
+font:bold 16px monospace;
+cursor:pointer
 }
 
 #app{
 display:none;
-width:100vw;
 height:100vh;
 padding:12px;
-
 background:
-radial-gradient(
-circle at 50% 45%,
-#073014 0%,
-#020805 35%,
-#000 75%
-);
+radial-gradient(circle,#063515,#010601 60%,#000)
 }
 
 .top{
-height:42px;
+height:40px;
 border-bottom:1px solid #00ff6644;
-
 display:flex;
 justify-content:space-between;
 align-items:center;
-
-font-size:12px;
+font-size:12px
 }
 
 .dot{
+display:inline-block;
 width:8px;
 height:8px;
-border-radius:50%;
-display:inline-block;
-
 background:#00ff66;
+border-radius:50%;
 box-shadow:0 0 10px #00ff66;
-
-margin-right:7px;
+margin-right:7px
 }
 
 #terminal{
-height:calc(100vh - 70px);
+height:calc(100vh - 65px);
 overflow:hidden;
-padding:12px 4px;
+padding-top:10px
 }
 
 .line{
-font-size:clamp(11px,2.8vw,15px);
+font-size:clamp(11px,2.7vw,15px);
 line-height:1.55;
-
 white-space:nowrap;
-overflow:hidden;
-
-text-shadow:0 0 6px #00ff66;
+text-shadow:0 0 6px #00ff66
 }
 
-.dim{
-opacity:.55;
-}
+.dim{opacity:.5}
 
 .blue{
 color:#00c8ff;
-text-shadow:0 0 7px #00c8ff;
+text-shadow:0 0 8px #00c8ff
 }
 
 .yellow{
 color:#ffe600;
-text-shadow:0 0 7px #ffe600;
+text-shadow:0 0 8px #ffe600
 }
 
 .red{
 color:#ff3030;
-text-shadow:0 0 9px red;
+text-shadow:0 0 10px red
 }
 
 .barbox{
-width:min(650px,95vw);
-height:17px;
-
+width:95%;
+height:15px;
 border:1px solid #00ff66;
-
-margin:7px 0 12px;
-
-box-shadow:0 0 12px #00ff6633;
+margin:5px 0 8px
 }
 
 .bar{
-width:0;
 height:100%;
-
+width:0;
 background:#00ff66;
-
-box-shadow:0 0 14px #00ff66;
-
-transition:width .18s linear;
+box-shadow:0 0 12px #00ff66
 }
 
 #warning{
 display:none;
-
 position:fixed;
 inset:0;
-
-z-index:50;
-
-background:rgba(50,0,0,.97);
-
+z-index:20;
+background:#320000;
+color:red;
 align-items:center;
 justify-content:center;
 flex-direction:column;
-
-text-align:center;
-
-color:#ff2222;
-
-animation:flash .18s infinite alternate;
+text-align:center
 }
 
 #warning h1{
-font:900 clamp(38px,12vw,100px) Arial;
-
-margin:12px;
-
-text-shadow:0 0 30px red;
-}
-
-#warning div{
-font-size:clamp(13px,4vw,22px);
+font:bold clamp(45px,13vw,100px) Arial;
+margin:15px;
+text-shadow:0 0 30px red
 }
 
 #count{
-font:bold 80px Arial;
-margin-top:15px;
+font:bold 75px Arial
 }
 
 #prank{
 display:none;
-
 position:fixed;
 inset:0;
-
-z-index:200;
-
-background:#000;
-
+z-index:30;
 align-items:center;
 justify-content:center;
 flex-direction:column;
-
 text-align:center;
+background:#000
 }
 
 #prank img{
 position:absolute;
 inset:0;
-
 width:100%;
 height:100%;
-
 object-fit:cover;
-
-filter:brightness(.72);
+filter:brightness(.7)
 }
 
 .overlay{
 position:absolute;
 inset:0;
-
-background:rgba(0,0,0,.30);
+background:#0004
 }
 
 .reveal{
 position:relative;
-z-index:2;
-
-text-align:center;
+z-index:2
 }
 
 .reveal h1{
-margin:0;
-
-font:900 clamp(42px,13vw,110px) Arial;
-
-color:#fff;
-
-text-shadow:
-0 0 18px #000,
-0 0 35px #00ff66;
-
-animation:pop .7s ease-out;
+font:bold clamp(42px,13vw,100px) Arial;
+color:white;
+text-shadow:0 0 20px #000,0 0 35px #00ff66;
+animation:pop .7s
 }
 
 .reveal p{
-color:#fff;
-
-font:700 18px Arial;
-
-text-shadow:0 2px 8px #000;
-}
-
-#again{
-margin-top:10px;
-}
-
-.glitch{
-animation:shake .07s infinite;
-}
-
-.scan{
-position:fixed;
-inset:0;
-
-pointer-events:none;
-
-z-index:300;
-
-background:
-repeating-linear-gradient(
-0deg,
-rgba(0,255,80,.025) 0,
-rgba(0,255,80,.025) 1px,
-transparent 1px,
-transparent 4px
-);
-}
-
-@keyframes flash{
-from{
-opacity:.7;
-}
-to{
-opacity:1;
-}
-}
-
-@keyframes shake{
-
-0%{
-transform:translate(0);
-}
-
-25%{
-transform:translate(5px,-2px);
-}
-
-50%{
-transform:translate(-5px,2px);
-}
-
-75%{
-transform:translate(2px,4px);
-}
-
-100%{
-transform:translate(0);
-}
-
+font:bold 18px Arial;
+color:white;
+text-shadow:0 2px 8px #000
 }
 
 @keyframes pop{
-
-0%{
-transform:scale(.05);
-opacity:0;
+0%{transform:scale(.1);opacity:0}
+70%{transform:scale(1.1)}
+100%{transform:scale(1);opacity:1}
 }
-
-65%{
-transform:scale(1.12);
-}
-
-100%{
-transform:scale(1);
-opacity:1;
-}
-
-}
-
 </style>
 </head>
 
 <body>
 
-
-<!-- START SCREEN -->
-
 <div id="start">
-
 <h1>SYSTEM DIAGNOSTIC</h1>
-
-<small>
-SECURE TERMINAL • INITIALIZATION REQUIRED
-</small>
-
-<button onclick="start()">
-INITIALIZE
-</button>
-
+<p>SECURE TERMINAL</p>
+<button onclick="start()">INITIALIZE</button>
 </div>
 
-
-<!-- TERMINAL -->
 
 <div id="app">
 
 <div class="top">
-
 <span>
 <i class="dot"></i>
 SECURE TERMINAL
 </span>
 
-<span id="clock">
-00:00
-</span>
-
+<span id="clock">00:00</span>
 </div>
 
 <div id="terminal"></div>
@@ -376,51 +216,33 @@ SECURE TERMINAL
 </div>
 
 
-<!-- FINAL ALERT -->
-
 <div id="warning">
 
-<div>
-⚠ SYSTEM SECURITY EVENT ⚠
-</div>
+<div>⚠ SYSTEM SECURITY EVENT ⚠</div>
 
-<h1>
-CRITICAL
-</h1>
+<h1>CRITICAL</h1>
 
-<div>
-FINAL VERIFICATION REQUIRED
-</div>
+<div>FINAL VERIFICATION REQUIRED</div>
 
-<div id="count">
-5
-</div>
+<div id="count">5</div>
 
 </div>
 
-
-<!-- PRANK REVEAL -->
 
 <div id="prank">
 
-<!-- Put your uploaded image in the same folder as this HTML
-     and rename it to prank.jpg -->
-
+<!-- Apni image ka naam prank.jpg rakho -->
 <img src="prank.jpg">
 
 <div class="overlay"></div>
 
 <div class="reveal">
 
-<h1>
-😂 PRANK HO GYA
-</h1>
+<h1>😂 PRANK HO GYA</h1>
 
-<p>
-Relax 😎 — kuch hack nahi hua.
-</p>
+<p>Relax 😎 — kuch hack nahi hua.</p>
 
-<button id="again" onclick="location.reload()">
+<button onclick="location.reload()">
 RUN AGAIN
 </button>
 
@@ -429,174 +251,142 @@ RUN AGAIN
 </div>
 
 
-<div class="scan"></div>
-
-
 <script>
 
-const terminal =
+const terminal=
 document.getElementById("terminal");
 
 
 /*
-VARIABLE TIMING
-
-Har dialogue ka wait alag hai.
-Kuch fast,
-kuch slow,
-kuch ke beech long silence.
+FAST CINEMATIC TIMELINE
+TOTAL ≈ 20–25 SEC
 */
 
 const scenes=[
 
-["Initializing secure runtime...","",2200],
+["Initializing secure runtime...","",650],
 
-["Loading diagnostic modules...","dim",3100],
+["Loading diagnostic modules...","dim",700],
 
-["Preparing secure session...","",1400],
+["Preparing secure session...","",500],
 
-["Session initialized.","blue",600],
+["Session initialized.","blue",450],
 
+["Checking environment...","",350],
 
-/* QUICK BURST */
+["Reading system interfaces...","",400],
 
-["Checking environment...","",450],
-
-["Reading system interfaces...","",500],
-
-["Interface response: WAITING","yellow",3000],
+["Interface response: WAITING","yellow",1200],
 
 
-/* LONG SILENCE */
+/* SHORT PAUSE */
 
-["PAUSE", "pause",3200],
-
-
-["Re-attempting interface check...","",900],
-
-["Response received.","blue",2500],
+["PAUSE","pause",1000],
 
 
-/* DEEP SCAN */
+["Re-attempting interface check...","",550],
 
-["Beginning deep diagnostic...","yellow",1200],
-
-["DEEP SCAN","progress",6500],
+["Response received.","blue",650],
 
 
-/* RAPID LOGS */
+/* SCAN */
 
-["Environment scan started.","",350],
+["Beginning deep diagnostic...","yellow",650],
+
+["DEEP SYSTEM SCAN","progress",2600],
+
+
+/* FAST BURST */
+
+["Checking permissions...","",350],
 
 ["Reading runtime...","",350],
 
-["Checking permissions...","",400],
+["Checking security layer...","",400],
 
-["Checking security layer...","",500],
+["Analyzing response...","",500],
 
-["Analyzing response...","",900],
-
-
-["PAUSE","pause",2500],
+["Security response: RESTRICTED","yellow",900],
 
 
-["Unexpected response detected.","yellow",3300],
+/* PAUSE */
+
+["PAUSE","pause",1100],
 
 
 /* SECOND SCAN */
 
-["Running secondary verification...","",1100],
+["Running secondary verification...","",600],
 
-["SECURITY VERIFICATION","progress",7200],
+["SECURITY VERIFICATION","progress",2500],
 
 
-["Verification incomplete.","yellow",1900],
+["Verification incomplete.","yellow",800],
 
-["Attempting fallback protocol...","",2900],
+["Attempting fallback protocol...","",750],
 
-["Fallback protocol accepted.","blue",1100],
+["Fallback protocol accepted.","blue",650],
 
 
 /* FINGERPRINT */
 
-["Generating diagnostic fingerprint...","",1800],
+["Generating diagnostic fingerprint...","",650],
 
-["Fingerprint: 7F-A9-21-CC","dim",1000],
+["Fingerprint: 7F-A9-21-CC","dim",500],
 
-["Verifying fingerprint...","",3700],
+["Verifying fingerprint...","",1100],
 
-["Fingerprint verified.","blue",2600],
-
-
-["PAUSE","pause",3500],
+["Fingerprint verified.","blue",700],
 
 
-/* REFERENCES */
+/* FAST REFERENCES */
 
-["Scanning temporary references...","",600],
+["Scanning temporary references...","",450],
 
-["Reference 01 checked.","dim",300],
+["Reference 01 checked.","dim",250],
 
-["Reference 02 checked.","dim",300],
+["Reference 02 checked.","dim",250],
 
-["Reference 03 checked.","dim",300],
-
-["Reference 04 checked.","dim",600],
+["Reference 03 checked.","dim",350],
 
 
-["PAUSE","pause",1900],
+["No direct access available.","yellow",900],
 
 
-["No direct access available.","yellow",3100],
+/* FINAL CHECK */
+
+["Running final integrity check...","yellow",700],
+
+["INTEGRITY ANALYSIS","progress",2600],
+
+["Boundary response: RESTRICTED","yellow",900],
+
+["Compiling report...","",650],
+
+["Encrypting report...","",1000],
+
+["Final validation pending...","red",900],
 
 
-/* THIRD SCAN */
+/* FINAL PAUSE */
 
-["Running extended integrity check...","yellow",1500],
-
-["INTEGRITY ANALYSIS","progress",8000],
+["PAUSE","pause",1000],
 
 
-["Analyzing process states...","",3600],
+["Unexpected security response.","yellow",1100],
 
-["Analyzing response patterns...","",2700],
-
-["Testing security boundaries...","",4000],
+["SECURITY EVENT DETECTED","red",650],
 
 
-["PAUSE","pause",2700],
+/* FAKE DEMO BANK ALERT */
 
+["⚠ DEMO BANK ALERT ⚠","red",700],
 
-["Boundary response: RESTRICTED","yellow",3600],
+["ACCOUNT SECURITY CHECK","yellow",700],
 
+["REMAINING BALANCE: ₹6.90","red",1200],
 
-["Compiling diagnostic report...","",1900],
-
-["Encrypting report...","",4300],
-
-["Final validation pending...","red",3100],
-
-
-["PAUSE","pause",3600],
-
-
-/* FINAL BUILDUP */
-
-["Starting final security check...","yellow",1900],
-
-["Verifying final state...","",4100],
-
-["PAUSE","pause",2300],
-
-["...","dim",3000],
-
-["Unexpected security response.","yellow",3300],
-
-["PAUSE","pause",1900],
-
-["SECURITY EVENT DETECTED","red",1300],
-
-["SIMULATED ALERT LEVEL: CRITICAL","red",2500]
+["VERIFICATION REQUIRED","yellow",900]
 
 ];
 
@@ -612,22 +402,18 @@ resolve=>setTimeout(resolve,ms)
 
 function add(text,cls=""){
 
-const d =
+const d=
 document.createElement("div");
 
-d.className =
-"line "+cls;
+d.className="line "+cls;
 
-d.textContent =
-"> "+text;
+d.textContent="> "+text;
 
 terminal.appendChild(d);
 
 
-/* Keep screen moving */
-
 while(
-terminal.children.length>32
+terminal.children.length>28
 ){
 
 terminal.removeChild(
@@ -639,64 +425,30 @@ terminal.firstChild
 }
 
 
-async function typeLine(
-text,
-cls=""
-){
+async function typeLine(text,cls=""){
 
-const d =
+const d=
 document.createElement("div");
 
-d.className =
-"line "+cls;
+d.className="line "+cls;
 
 terminal.appendChild(d);
 
-let output="> ";
+let out="> ";
 
-
-/*
-Different typing speeds
-*/
-
-let speed;
-
-if(text==="..."){
-
-speed=180;
-
-}
-else if(
-text.includes("CRITICAL")
-){
-
-speed=35;
-
-}
-else if(
-text.length>35
-){
-
-speed=10+
-Math.random()*10;
-
-}
-else{
-
-speed=18+
-Math.random()*18;
-
-}
+let speed=
+text.length>30
+?7
+:11;
 
 
 for(
-const character of text
+const ch of text
 ){
 
-output+=character;
+out+=ch;
 
-d.textContent=
-output;
+d.textContent=out;
 
 await sleep(speed);
 
@@ -705,31 +457,25 @@ await sleep(speed);
 }
 
 
-/*
-PROGRESS BAR
-*/
+/* PROGRESS BAR */
 
-async function progress(
-label,
-totalTime
-){
+async function progress(label,time){
 
 add(
-label+
-" — START",
+label+" — START",
 "yellow"
 );
 
-await sleep(900);
+await sleep(250);
 
 
-const box =
+const box=
 document.createElement("div");
 
 box.className="barbox";
 
 
-const bar =
+const bar=
 document.createElement("div");
 
 bar.className="bar";
@@ -740,94 +486,34 @@ box.appendChild(bar);
 terminal.appendChild(box);
 
 
-let percent=0;
+let p=0;
+
+const startTime=Date.now();
 
 
-while(percent<100){
+while(p<100){
 
-let jump;
-
-
-/*
-Irregular progress
-*/
-
-if(percent<20){
-
-jump=
+p+=
 Math.floor(
-Math.random()*3
-)+1;
+Math.random()*9
+)+3;
 
-}
-else if(percent<55){
+if(p>100)p=100;
 
-jump=
-Math.floor(
-Math.random()*7
-)+2;
-
-}
-else if(percent<75){
-
-jump=
-Math.floor(
-Math.random()*2
-)+1;
-
-}
-else{
-
-jump=
-Math.floor(
-Math.random()*5
-)+1;
-
-}
+bar.style.width=p+"%";
 
 
-percent=
-Math.min(
-100,
-percent+jump
-);
+let delay=80+
+Math.random()*130;
 
 
-bar.style.width=
-percent+"%";
+/* tiny fake pauses */
 
+if(p>35 && p<45)
+delay=250;
 
-let delay =
-100+
-Math.random()*280;
-
-
-/*
-Fake hesitation
-*/
-
-if(
-percent>25 &&
-percent<35
-){
-
-delay=
-650+
-Math.random()*900;
-
-}
-
-
-if(
-percent>70 &&
-percent<80
-){
-
-delay=
-900+
-Math.random()*1200;
-
-}
+if(p>75 && p<82)
+delay=400;
 
 
 await sleep(delay);
@@ -835,31 +521,21 @@ await sleep(delay);
 }
 
 
-await sleep(900);
-
+await sleep(300);
 
 add(
 "SCAN COMPLETE.",
 "blue"
 );
 
-
-await sleep(1700);
+await sleep(400);
 
 }
 
 
-/*
-MAIN START
-*/
+/* START */
 
 async function start(){
-
-/*
-Try fullscreen.
-Browser may still allow
-user controls/exit.
-*/
 
 try{
 
@@ -867,8 +543,7 @@ await document
 .documentElement
 .requestFullscreen();
 
-}
-catch(e){}
+}catch(e){}
 
 
 document.getElementById(
@@ -881,17 +556,13 @@ document.getElementById(
 ).style.display="block";
 
 
-/*
-Timer
-*/
+/* CLOCK */
 
 let seconds=0;
-
 
 setInterval(()=>{
 
 seconds++;
-
 
 document.getElementById(
 "clock"
@@ -900,11 +571,9 @@ document.getElementById(
 String(
 Math.floor(seconds/60)
 ).padStart(2,"0")
-
-+":"
-
 +
-
+":"
++
 String(
 seconds%60
 ).padStart(2,"0");
@@ -912,16 +581,12 @@ seconds%60
 },1000);
 
 
-/*
-Initial suspense
-*/
+/* INITIAL DELAY */
 
-await sleep(1800);
+await sleep(600);
 
 
-/*
-Run all scenes
-*/
+/* RUN */
 
 for(
 const scene of scenes
@@ -934,13 +599,9 @@ const type=scene[1];
 const wait=scene[2];
 
 
-/*
-Long silence
-*/
+/* PAUSE */
 
-if(
-type==="pause"
-){
+if(type==="pause"){
 
 await sleep(wait);
 
@@ -949,27 +610,18 @@ continue;
 }
 
 
-/*
-Progress bar
-*/
+/* PROGRESS */
 
-if(
-type==="progress"
-){
+if(type==="progress"){
 
-await progress(
-text,
-wait
-);
+await progress(text,wait);
 
 continue;
 
 }
 
 
-/*
-Normal dialogue
-*/
+/* NORMAL LINE */
 
 await typeLine(
 text,
@@ -977,38 +629,31 @@ type
 );
 
 
-/*
-Variable pause after
-every line
-*/
+/* VARIABLE PAUSE */
 
 await sleep(
 wait+
-Math.random()*900
+Math.random()*250
 );
 
 }
 
 
-/*
-Final alert
-*/
+/* FINAL ALERT */
 
 await finalAlert();
 
 }
 
 
-/*
-FINAL ALERT
-*/
+/* FINAL ALERT */
 
 async function finalAlert(){
 
-await sleep(3000);
+await sleep(900);
 
 
-const warning =
+const warning=
 document.getElementById(
 "warning"
 );
@@ -1016,56 +661,45 @@ document.getElementById(
 warning.style.display="flex";
 
 
-let number=5;
+let n=5;
 
-
-const counter =
+const count=
 document.getElementById(
 "count"
 );
 
-
-await sleep(1200);
+count.textContent=n;
 
 
 const timer=setInterval(()=>{
 
-number--;
+n--;
 
-counter.textContent=
-number;
+count.textContent=n;
 
 
-if(number<=0){
+if(n<=0){
 
 clearInterval(timer);
-
-
-warning.classList.add(
-"glitch"
-);
 
 
 setTimeout(()=>{
 
 warning.style.display="none";
 
-
 document.getElementById(
 "app"
 ).style.display="none";
-
 
 document.getElementById(
 "prank"
 ).style.display="flex";
 
-
-},900);
+},500);
 
 }
 
-},1000);
+},800);
 
 }
 
