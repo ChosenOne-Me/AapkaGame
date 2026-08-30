@@ -2,29 +2,156 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>System Security</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>System Diagnostic</title>
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:#020403;
-  color:#00ff66;
-  font-family:monospace;
+html,body{
+  margin:0;width:100%;height:100%;
+  background:#000;color:#00ff66;
+  font-family:"Courier New",monospace;
   overflow:hidden;
 }
-#screen{
-  height:100vh;
-  padding:20px;
-  position:relative;
+body{
   background:
-    radial-gradient(circle at center,#062b12 0,#020403 55%,#000 100%);
+  radial-gradient(circle at 50% 45%,#073014 0%,#020805 35%,#000 75%);
 }
-.scanlines{
-  pointer-events:none;
-  position:fixed;
-  inset:0;
+#start{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  background:#000;
+  text-align:center;
+}
+#start h1{
+  font-size:clamp(28px,8vw,60px);
+  letter-spacing:5px;
+  text-shadow:0 0 20px #00ff66;
+}
+#start button,#again{
+  border:1px solid #00ff66;
+  background:#001b09;color:#00ff66;
+  padding:15px 28px;
+  font:700 16px monospace;
+  box-shadow:0 0 20px #00ff6644;
+  cursor:pointer;
+}
+#start small{opacity:.55;margin:18px}
+
+#app{
+  display:none;
+  width:100vw;height:100vh;
+  padding:12px;
+}
+.top{
+  height:42px;
+  border-bottom:1px solid #00ff6644;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:12px;
+}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  display:inline-block;background:#00ff66;
+  box-shadow:0 0 10px #00ff66;
+  margin-right:7px;
+}
+#terminal{
+  height:calc(100vh - 70px);
+  overflow:hidden;
+  padding:12px 4px;
+}
+.line{
+  font-size:clamp(11px,2.8vw,15px);
+  line-height:1.55;
+  white-space:nowrap;
+  overflow:hidden;
+  text-shadow:0 0 6px #00ff66;
+}
+.dim{opacity:.55}
+.blue{color:#00c8ff;text-shadow:0 0 7px #00c8ff}
+.yellow{color:#ffe600;text-shadow:0 0 7px #ffe600}
+.red{color:#ff3030;text-shadow:0 0 9px red}
+.white{color:#eee;text-shadow:none}
+
+.barbox{
+  width:min(650px,95vw);
+  height:17px;
+  border:1px solid #00ff66;
+  margin:7px 0 12px;
+  box-shadow:0 0 12px #00ff6633;
+}
+.bar{
+  width:0;height:100%;
+  background:#00ff66;
+  box-shadow:0 0 14px #00ff66;
+  transition:width .18s linear;
+}
+
+#warning{
+  display:none;
+  position:fixed;inset:0;z-index:50;
+  background:rgba(50,0,0,.97);
+  align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;
+  color:#ff2222;
+  animation:flash .22s infinite alternate;
+}
+#warning h1{
+  font:900 clamp(38px,12vw,100px) Arial;
+  margin:12px;
+  text-shadow:0 0 30px red;
+}
+#warning div{font-size:clamp(13px,4vw,22px)}
+#count{
+  font:bold 80px Arial;
+  margin-top:15px;
+}
+
+#prank{
+  display:none;
+  position:fixed;inset:0;z-index:200;
+  background:#000;
+  align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;
+}
+#prank h1{
+  margin:0;
+  font:900 clamp(42px,13vw,110px) Arial;
+  color:#00ff66;
+  text-shadow:0 0 35px #00ff66;
+  animation:pop .7s ease-out;
+}
+#prank p{
+  color:#fff;
+  font:18px Arial;
+  margin:18px;
+}
+#again{margin-top:10px}
+
+.glitch{
+  animation:shake .08s infinite;
+}
+@keyframes flash{
+  from{opacity:.72}to{opacity:1}
+}
+@keyframes shake{
+  0%{transform:translate(0)}
+  25%{transform:translate(5px,-2px)}
+  50%{transform:translate(-5px,2px)}
+  75%{transform:translate(2px,4px)}
+  100%{transform:translate(0)}
+}
+@keyframes pop{
+  0%{transform:scale(.05);opacity:0}
+  65%{transform:scale(1.12)}
+  100%{transform:scale(1);opacity:1}
+}
+.scan{
+  position:fixed;inset:0;
+  pointer-events:none;z-index:300;
   background:repeating-linear-gradient(
     0deg,
     rgba(0,255,80,.025) 0px,
@@ -32,192 +159,154 @@ body{
     transparent 1px,
     transparent 4px
   );
-  z-index:20;
-}
-#terminal{
-  height:100%;
-  overflow:hidden;
-  text-shadow:0 0 7px #00ff66;
-}
-.line{
-  margin:6px 0;
-  font-size:14px;
-}
-.dim{opacity:.65}
-.warn{color:#ff3333;text-shadow:0 0 8px red}
-.yellow{color:#ffe600}
-.progress{
-  width:100%;
-  max-width:600px;
-  height:18px;
-  border:1px solid #00ff66;
-  margin:10px 0;
-  box-shadow:0 0 10px #00ff6644;
-}
-.bar{
-  height:100%;
-  width:0%;
-  background:#00ff66;
-  box-shadow:0 0 15px #00ff66;
-  transition:width .2s;
-}
-#alert{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:30;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  background:rgba(50,0,0,.96);
-  color:#ff2020;
-  text-align:center;
-  text-shadow:0 0 20px red;
-  animation:flash .35s infinite alternate;
-}
-#alert h1{
-  font-size:clamp(35px,10vw,90px);
-  margin:10px;
-}
-#count{
-  font-size:70px;
-}
-#prank{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:50;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  background:#050505;
-  color:#00ff66;
-  text-align:center;
-}
-#prank h1{
-  font-family:Arial,sans-serif;
-  font-size:clamp(42px,12vw,110px);
-  margin:10px;
-  animation:pop .7s ease-out;
-  text-shadow:0 0 25px #00ff66;
-}
-#prank p{
-  font-family:Arial,sans-serif;
-  color:white;
-  font-size:20px;
-}
-button{
-  padding:12px 25px;
-  background:#00ff66;
-  color:#000;
-  border:0;
-  font-weight:bold;
-  border-radius:5px;
-  cursor:pointer;
-}
-@keyframes flash{
-  from{opacity:.75}
-  to{opacity:1}
-}
-@keyframes pop{
-  0%{transform:scale(.1);opacity:0}
-  70%{transform:scale(1.15)}
-  100%{transform:scale(1);opacity:1}
-}
-.glitch{
-  animation:glitch .12s infinite;
-}
-@keyframes glitch{
-  0%{transform:translate(0)}
-  25%{transform:translate(4px,-2px)}
-  50%{transform:translate(-4px,2px)}
-  75%{transform:translate(2px,1px)}
-  100%{transform:translate(0)}
 }
 </style>
 </head>
 
 <body>
 
-<div id="screen">
+<div id="start">
+  <h1>SYSTEM DIAGNOSTIC</h1>
+  <small>SECURE TERMINAL • INITIALIZATION REQUIRED</small>
+  <button onclick="start()">INITIALIZE</button>
+</div>
+
+<div id="app">
+  <div class="top">
+    <span><i class="dot"></i>SECURE TERMINAL</span>
+    <span id="clock">00:00</span>
+  </div>
   <div id="terminal"></div>
 </div>
 
-<div class="scanlines"></div>
-
-<div id="alert">
-  <div>⚠ SECURITY BREACH ⚠</div>
-  <h1>CRITICAL ALERT</h1>
-  <div>UNAUTHORIZED ACCESS DETECTED</div>
+<div id="warning">
+  <div>⚠ SYSTEM SECURITY EVENT ⚠</div>
+  <h1>CRITICAL</h1>
+  <div>FINAL VERIFICATION REQUIRED</div>
   <div id="count">5</div>
 </div>
 
 <div id="prank">
   <h1>😂 PRANK HO GYA</h1>
-  <p>Relax... kuch hack nahi hua 😎</p>
-  <button onclick="location.reload()">RUN AGAIN</button>
+  <p>Relax 😎 — ye sirf ek harmless simulation thi.</p>
+  <button id="again" onclick="location.reload()">RUN AGAIN</button>
 </div>
+
+<div class="scan"></div>
 
 <script>
 const terminal=document.getElementById("terminal");
 
-const messages=[
- "BOOTING SECURITY PROTOCOL...",
- "Initializing encrypted environment...",
- "Loading security modules...",
- "Establishing secure connection...",
- "Connection established.",
- "Scanning available network nodes...",
- "Searching for active devices...",
- "Device detected...",
- "Analyzing system architecture...",
- "Checking security permissions...",
- "Bypassing simulated firewall...",
- "Firewall response: DENIED",
- "Attempting secondary protocol...",
- "Protocol accepted.",
- "Scanning system directories...",
- "Searching user files...",
- "Scanning temporary storage...",
- "Analyzing system logs...",
- "Checking access privileges...",
- "Privilege level: ELEVATED",
- "Encrypting simulated connection...",
- "Preparing final security check..."
+const logs=[
+["Initializing secure runtime...",""],
+["Loading system diagnostics module...","dim"],
+["Checking local environment...",""],
+["Preparing encrypted simulation...",""],
+["Session initialized.","blue"],
+["Running compatibility checks...",""],
+["Checking browser capabilities...",""],
+["Analyzing available system interfaces...",""],
+["Security layer: ACTIVE","blue"],
+["Generating diagnostic fingerprint...",""],
+["Fingerprint generated.","blue"],
+["Running environment scan...",""],
+["Checking storage interface...",""],
+["Checking memory interface...",""],
+["Checking display interface...",""],
+["Checking network interface...",""],
+["Network interface: SIMULATED","yellow"],
+["Beginning deep diagnostic sequence...","yellow"],
+["Module 01 — Environment scan",""],
+["Module 02 — Runtime analysis",""],
+["Module 03 — Security verification",""],
+["Module 04 — Permission audit",""],
+["Module 05 — Integrity check",""],
+["Module 06 — Session verification",""],
+["Generating encrypted checksum...",""],
+["Checksum: 7F-A9-21-CC","dim"],
+["Verifying checksum...",""],
+["Checksum verified.","blue"],
+["Scanning temporary system references...",""],
+["Reviewing cached references...",""],
+["Review complete.","blue"],
+["Running extended diagnostics...","yellow"],
+["Analyzing process states...",""],
+["Analyzing system response...",""],
+["Testing security boundaries...",""],
+["Boundary response: RESTRICTED","yellow"],
+["Running secondary verification...",""],
+["Secondary verification initialized.","blue"],
+["Checking anomaly patterns...",""],
+["Anomaly analysis: IN PROGRESS",""],
+["Compiling diagnostic report...",""],
+["Encrypting report...",""],
+["Final security validation pending...","red"]
 ];
-
-let i=0;
 
 function add(text,cls=""){
   const d=document.createElement("div");
   d.className="line "+cls;
   d.textContent="> "+text;
   terminal.appendChild(d);
-  terminal.scrollTop=terminal.scrollHeight;
+
+  while(terminal.children.length>34)
+    terminal.removeChild(terminal.firstChild);
 }
 
-function typeMessages(){
-  if(i<messages.length){
-    add(messages[i]);
-    i++;
+function sleep(ms){
+  return new Promise(r=>setTimeout(r,ms));
+}
 
-    let delay=700+Math.random()*500;
+async function typeLine(text,cls){
+  const d=document.createElement("div");
+  d.className="line "+cls;
+  terminal.appendChild(d);
 
-    if(i===7) delay=1200;
-    if(i===13) delay=1400;
-    if(i===18) delay=1000;
-
-    setTimeout(typeMessages,delay);
-  }else{
-    progress();
+  let out="> ";
+  for(let c of text){
+    out+=c;
+    d.textContent=out;
+    await sleep(5+Math.random()*9);
   }
 }
 
-function progress(){
-  add("SYSTEM SCAN IN PROGRESS...","yellow");
+async function start(){
+
+  try{
+    await document.documentElement.requestFullscreen();
+  }catch(e){}
+
+  document.getElementById("start").style.display="none";
+  document.getElementById("app").style.display="block";
+
+  let sec=0;
+  setInterval(()=>{
+    sec++;
+    let m=String(Math.floor(sec/60)).padStart(2,"0");
+    let s=String(sec%60).padStart(2,"0");
+    document.getElementById("clock").textContent=m+":"+s;
+  },1000);
+
+  await sleep(700);
+
+  for(let i=0;i<logs.length;i++){
+    await typeLine(logs[i][0],logs[i][1]);
+
+    if(i===17 || i===33 || i===40){
+      await sleep(400);
+      await progress();
+    }
+
+    await sleep(180+Math.random()*500);
+  }
+
+  await finalSequence();
+}
+
+async function progress(){
 
   const box=document.createElement("div");
-  box.className="progress";
+  box.className="barbox";
 
   const bar=document.createElement("div");
   bar.className="bar";
@@ -227,28 +316,32 @@ function progress(){
 
   let p=0;
 
-  const timer=setInterval(()=>{
-    p+=Math.floor(Math.random()*7)+2;
+  while(p<100){
+    p+=Math.floor(Math.random()*8)+2;
     if(p>100)p=100;
 
     bar.style.width=p+"%";
+    await sleep(90+Math.random()*100);
+  }
 
-    if(p===100){
-      clearInterval(timer);
-
-      setTimeout(()=>{
-        add("SCAN COMPLETE.");
-        add("MULTIPLE SECURITY EVENTS DETECTED.","warn");
-      },800);
-
-      setTimeout(showAlert,2500);
-    }
-  },300);
+  await sleep(350);
 }
 
-function showAlert(){
-  const alert=document.getElementById("alert");
-  alert.style.display="flex";
+async function finalSequence(){
+
+  await sleep(900);
+
+  add("FINAL CHECK STARTING...","yellow");
+  await sleep(700);
+
+  add("████████████████████████","red");
+  add("SECURITY EVENT DETECTED","red");
+  add("SIMULATED ALERT LEVEL: CRITICAL","red");
+
+  await sleep(1000);
+
+  const warning=document.getElementById("warning");
+  warning.style.display="flex";
 
   let n=5;
   const count=document.getElementById("count");
@@ -259,23 +352,17 @@ function showAlert(){
 
     if(n<=0){
       clearInterval(timer);
-      setTimeout(showPrank,700);
+
+      warning.classList.add("glitch");
+
+      setTimeout(()=>{
+        warning.style.display="none";
+        document.getElementById("app").style.display="none";
+        document.getElementById("prank").style.display="flex";
+      },700);
     }
-  },900);
+  },1000);
 }
-
-function showPrank(){
-  document.getElementById("alert").style.display="none";
-  document.getElementById("screen").classList.add("glitch");
-
-  setTimeout(()=>{
-    document.getElementById("screen").style.display="none";
-    document.getElementById("prank").style.display="flex";
-  },500);
-}
-
-/* Start */
-setTimeout(typeMessages,1000);
 </script>
 
 </body>
